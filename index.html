@@ -562,6 +562,31 @@ tr:hover td{background:#fdfaf8}
 const MO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 const DW = ['일','월','화','수','목','금','토'];
 
+/* 베뉴별 컬러칩 */
+const VENUE_COLORS = {
+  v1:{bg:'#ede9fe',fg:'#7c3aed'},  // 바이올렛 · 웨딩그룹위더스
+  v2:{bg:'#cffafe',fg:'#0369a1'},  // 스카이  · 루이비스컨벤션
+  v3:{bg:'#ffedd5',fg:'#c2410c'},  // 오렌지  · 베뉴지1층
+  v4:{bg:'#fef9c3',fg:'#a16207'},  // 앰버    · 베뉴지2층
+  v5:{bg:'#dcfce7',fg:'#16a34a'},  // 그린    · 베뉴지B1
+  v6:{bg:'#fce7f3',fg:'#be185d'},  // 핑크    · 포포인츠쉐라톤
+  v7:{bg:'#e0e7ff',fg:'#4338ca'},  // 인디고  · 웨스턴베니비스
+  v8:{bg:'#ccfbf1',fg:'#0f766e'},  // 틸      · 규수당문래
+  v9:{bg:'#fee2e2',fg:'#dc2626'},  // 로즈    · 보타닉파크웨딩
+};
+
+/* 캘린더 이벤트 표시 텍스트: HH:MM 베뉴명(홀명) */
+function calEvLabel(e){
+  const v = e.venueId ? S.venues.find(v=>v.id===e.venueId) : null;
+  const timeMatch = e.notes ? e.notes.match(/\d{1,2}:\d{2}/) : null;
+  const timeStr = timeMatch ? timeMatch[0]+' ' : '';
+  if(v){
+    const hallShort = v.hall ? '('+v.hall.split('/')[0]+')' : '';
+    return timeStr + v.name + hallShort;
+  }
+  return timeStr + e.name;
+}
+
 const LOG_CHECKS = [
   '대관료 포함 항목 확인 (조명·음향·기본 장식 등)',
   '외부 업체 반입 가능 여부 (스드메·케이터링·촬영팀)',
@@ -608,7 +633,7 @@ const DEF_VENUES = [
   {id:'v5',reg:'강서구',name:'베뉴지 강서',hall:'B1 마리아칼라스',rent:1100,deco:0,food:7.3,guests:150,opts:'음주류 별도 | 식대 A 7.3만/인 or B 8.2만/인',notes:'',rating:0},
   {id:'v6',reg:'구로구',name:'포포인츠 바이 쉐라톤',hall:'구로',rent:1500,deco:0,food:8.9,guests:150,opts:'음주류 별도 | 토 12시 보증150명 / 그외 100명 가능',notes:'잔여: 1~3월 12시·17시',rating:0},
   {id:'v7',reg:'구로구',name:'웨스턴베니비스',hall:'신도림 (아스타/그레이스/다이너스티)',rent:750,deco:0,food:7.5,guests:200,opts:'음주류·봉사료·VAT 포함 | 11시~15시 타임 다양',notes:'1~3월 전반 여유 | 일 150명 / 점심 200명 가능',rating:0},
-  {id:'v8',reg:'영등포구',name:'규수당 문래',hall:'',rent:580,deco:0,food:6.5,guests:200,opts:'음주류·봉사료·VAT 포함 | 컨시어지 30만(선택) | 방문 시 추가 할인',notes:'26~27.2월 홀 580만/식대 6.5만 | 27.3~6월 홀 680만/식대 7.0만 | 1~2월 토 전마감 | 3~4월 토 18:00만 | 3월 일요일 점심 여유',rating:0},
+  {id:'v8',reg:'영등포구',name:'규수당 문래',hall:'',rent:580,deco:0,food:6.5,guests:200,opts:'음주류·봉사료·VAT 포함 | 컨시어지 30만(선택) | 방문 시 추가 할인',notes:'26~27.2월 홀 580만/식대 6.5만 | 27.3~6월 홀 680만/식대 7.0만 | 2~2월 토 전마감 | 3~4월 토 18:00만 | 3월 일요일 점심 여유',rating:0},
   {id:'v9',reg:'강서구',name:'보타닉파크웨딩',hall:'강서',rent:0,deco:0,food:0,guests:0,opts:'',notes:'2026-05-03 17:00 투어 방문',rating:0},
 ];
 
@@ -656,7 +681,7 @@ const DEF_EVENTS = [
   {id:'eb04',date:'2027-02-07',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'일 16:00 이후 가능'},
   {id:'eb05',date:'2027-03-06',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'토 19:00 이후 가능'},
   {id:'eb06',date:'2027-03-07',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'일 16:00 이후 가능'},
-  {id:'eb07',date:'2027-04-03',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'4월 토: 11:00 또는 18:30 가능'},
+  {id:'eb07',date:'2027-04-03',date:'2027-04-03',date:'2027-04-03',date:'2027-04-03',date:'2027-04-03',date:'2027-04-03',date:'2027-04-03',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'4월 토: 11:00 또는 18:30 가능'},
   {id:'eb08',date:'2027-04-04',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'4월 일: 16:20 이후 가능'},
 
   // ── 웨딩그룹위더스 영등포 가능일 (1~3월 점심 타임 여유) ──
@@ -907,12 +932,14 @@ function renderCal(){
     if(today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===day) cls+=' today';
     if(devts.length) cls+=' has-ev';
     const ev=devts.map(e=>{
-      const ec=e.type==='tour'?'ev-tour':e.type==='avail'?'ev-avail':'ev-other';
-      const shortName=e.name.length>9?e.name.slice(0,9)+'…':e.name;
-      return `<div class="cal-ev ${ec}"
+      const vc = e.venueId ? VENUE_COLORS[e.venueId] : null;
+      const ec = vc ? '' : (e.type==='tour'?'ev-tour':e.type==='avail'?'ev-avail':'ev-other');
+      const vstyle = vc ? `style="background:${vc.bg};color:${vc.fg}"` : '';
+      const label = calEvLabel(e);
+      return `<div class="cal-ev ${ec}" ${vstyle}
         onclick="event.stopPropagation();openEvt('${e.id}')"
         onmouseenter="showTip(event,'${e.id}')"
-        onmouseleave="hideTip()">${shortName}</div>`;
+        onmouseleave="hideTip()">${label}</div>`;
     }).join('');
     html+=`<div class="${cls}" onclick="openEvt(null,'${ds}')"><div class="cal-dn">${day}</div>${ev}</div>`;
   }
@@ -927,14 +954,16 @@ function renderCal(){
   }
   listEl.innerHTML = monthEvts.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{
     const d=new Date(e.date);
-    const tc=e.type==='tour'?'ev-tour':e.type==='avail'?'ev-avail':'ev-other';
+    const vc = e.venueId ? VENUE_COLORS[e.venueId] : null;
+    const tc = vc ? '' : (e.type==='tour'?'ev-tour':e.type==='avail'?'ev-avail':'ev-other');
+    const vstyle = vc ? `background:${vc.bg};color:${vc.fg}` : '';
     const tl=e.type==='tour'?'투어':e.type==='avail'?'가능일':'기타';
     const v=S.venues.find(v=>v.id===e.venueId);
+    const label = calEvLabel(e);
     return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <div class="cal-ev ${tc}" style="flex-shrink:0;font-size:11px">${tl}</div>
+      <div class="cal-ev ${tc}" style="flex-shrink:0;font-size:11px;${vstyle}">${tl}</div>
       <div style="flex:1">
-        <span style="font-size:13px;font-weight:600">${d.getMonth()+1}/${d.getDate()}(${DW[d.getDay()]}) ${e.name}</span>
-        ${v?`<span style="font-size:11px;color:var(--text-l)"> · ${v.name}</span>`:''}
+        <span style="font-size:13px;font-weight:600">${d.getMonth()+1}/${d.getDate()}(${DW[d.getDay()]}) ${label}</span>
         ${e.notes?`<div style="font-size:11px;color:var(--text-l)">${e.notes}</div>`:''}
       </div>
       <button class="btn btn-o btn-icon" onclick="openEvt('${e.id}')">✏️</button>
@@ -1313,47 +1342,4 @@ function delLog(){
   toast('상담일지가 삭제되었습니다.');
 }
 
-/* ═══════════════════════════════
-   TOAST
-═══════════════════════════════ */
-function toast(msg){
-  const t=document.createElement('div');
-  t.className='toast';t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2200);
-}
-
-/* ═══════════════════════════════
-   INIT
-═══════════════════════════════ */
-load();
-renderBudget();
-renderDash();
-
-// ── CHAT INTEGRATION HELPER ──
-// 채팅창에서 아래 함수를 활용해 데이터를 추가할 수 있습니다
-window.WD = {
-  addVenue(v){
-    S.venues.push({id:'v'+Date.now(),...v,rating:v.rating||0});
-    save();render(S.tab);renderBudget();toast('베뉴 추가: '+v.name);
-  },
-  addEvent(e){
-    S.events.push({id:'e'+Date.now(),...e});
-    save();render(S.tab);toast('일정 추가: '+e.name);
-  },
-  exportJSON(){
-    const data={budget:S.budget,venues:S.venues,events:S.events,checklist:S.cl,notes:S.notes};
-    const a=document.createElement('a');
-    a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));
-    a.download='wedding_data.json';a.click();
-  },
-  importJSON(json){
-    const d=typeof json==='string'?JSON.parse(json):json;
-    if(d.venues)S.venues=[...S.venues,...d.venues];
-    if(d.events)S.events=[...S.events,...d.events];
-    save();render(S.tab);renderBudget();toast('데이터 가져오기 완료!');
-  }
-};
-</script>
-</body>
-</html>
+/* ══════════
