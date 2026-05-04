@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💒 웨딩 투어 대시보드</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c4956a;--gold-l:#f0e4d7;--gold-d:#8b6f5c;
+  --rose:#e8a0a0;--rose-l:#fdf0f0;
+  --green:#6aaa60;--green-l:#edf6eb;
+  --blue:#6d9aaa;--blue-l:#edf4f6;
+  --bg:#faf8f6;--card:#fff;--border:#ede0d4;
+  --text:#3d2b1f;--text-l:#9a7e72;
+  --r:12px;--shadow:0 2px 12px rgba(0,0,0,.07);
+}
+body{background:var(--bg);color:var(--text);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;min-height:100vh}
+
+/* ── Header ── */
+.app-header{background:linear-gradient(135deg,#3d2b1f 0%,#6b4c3b 100%);color:#fff;padding:14px 20px}
+.app-header h1{font-size:19px;font-weight:700;letter-spacing:-.5px}
+.app-header .sub{font-size:11px;opacity:.65;margin-top:2px}
+
+/* ── Budget Bar ── */
+.budget-bar{background:#fff;padding:13px 20px;border-bottom:1px solid var(--border)}
+.budget-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.budget-lbl{font-size:12px;font-weight:600;color:var(--text-l)}
+.budget-ttl{font-size:15px;font-weight:700;color:var(--gold-d);cursor:pointer}
+.budget-tracks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.b-track{cursor:pointer}
+.b-track-lbl{font-size:11px;color:var(--text-l);margin-bottom:3px}
+.b-track-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.b-track-fill{height:100%;border-radius:3px;transition:width .4s}
+.b-track-amt{font-size:11px;font-weight:600;margin-top:2px}
+
+/* ── Nav ── */
+.nav{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto}
+.nav-t{padding:11px 18px;font-size:13px;font-weight:500;color:var(--text-l);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .18s}
+.nav-t.on{color:var(--gold-d);border-bottom-color:var(--gold)}
+.nav-t:hover{background:var(--bg)}
+
+/* ── Layout ── */
+.main{padding:16px 20px;max-width:1400px;margin:0 auto}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.card-ttl{font-size:14px;font-weight:700}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .18s;font-family:inherit}
+.btn-p{background:var(--gold);color:#fff}.btn-p:hover{background:var(--gold-d)}
+.btn-o{background:#fff;border:1px solid var(--border);color:var(--text)}.btn-o:hover{background:var(--bg)}
+.btn-d{background:#fee2e2;color:#dc2626;border:none}.btn-d:hover{background:#fecaca}
+.btn-s{padding:5px 9px;font-size:12px}
+.btn-icon{padding:5px 7px;font-size:13px}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.stat{background:#fff;border-radius:var(--r);padding:14px 12px;border:1px solid var(--border);text-align:center;box-shadow:var(--shadow)}
+.stat-v{font-size:22px;font-weight:700;color:var(--gold-d)}
+.stat-l{font-size:11px;color:var(--text-l);margin-top:2px}
+
+/* ── Calendar ── */
+.cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.cal-nav button{background:#fff;border:1px solid var(--border);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.cal-title{font-size:16px;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dh{text-align:center;font-size:11px;font-weight:600;color:var(--text-l);padding:6px 0}
+.cal-dh:first-child{color:#e07878}
+.cal-dh:last-child{color:var(--blue)}
+.cal-d{min-height:72px;padding:4px;border-radius:8px;border:1px solid transparent;cursor:pointer;transition:all .15s;position:relative}
+.cal-d:hover{background:var(--gold-l);border-color:#e8c9a8}
+.cal-d.other{opacity:.3}
+.cal-d.today{border-color:var(--gold)!important;background:var(--gold-l)}
+.cal-d.sun .cal-dn{color:#e07878}
+.cal-d.sat .cal-dn{color:var(--blue)}
+.cal-dn{font-size:12px;font-weight:500;margin-bottom:3px}
+.cal-ev{font-size:10px;padding:2px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.4}
+.ev-tour{background:var(--blue-l);color:#4a7f91}
+.ev-avail{background:var(--green-l);color:#3d8c35}
+.ev-other{background:var(--gold-l);color:var(--gold-d)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-l)}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:auto}
+th{background:var(--bg);padding:9px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--text-l);white-space:nowrap;border-bottom:2px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid #f5f0eb;vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fdfaf8}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-r{background:var(--gold-l);color:var(--gold-d)}
+/* 긴 텍스트 열 말줄임 */
+.td-clip{max-width:180px;overflow:hidden;text-overflow:ellipsis;cursor:help}
+
+/* ── Cost Bar ── */
+.cost-row{margin-bottom:10px}
+.cost-row-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.cost-bar-bg{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.cost-bar-fill{height:100%;border-radius:4px;transition:width .4s}
+
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-hdr{padding:18px 18px 0;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal-hdr h3{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-l);padding:2px 6px}
+.modal-body{padding:0 18px 18px}
+
+/* ── Form ── */
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--text-l);margin-bottom:5px}
+.fi{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;transition:border-color .2s;font-family:inherit}
+.fi:focus{border-color:var(--gold)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fi-ta{min-height:70px;resize:vertical}
+
+/* ── Rating ── */
+.rating{display:flex;gap:4px}
+.rs{font-size:20px;cursor:pointer;color:#d1d5db;transition:color .15s}
+.rs.on{color:#f59e0b}
+
+/* ── Checklist ── */
+.cl-cat{margin-bottom:16px}
+.cl-cat-t{font-size:12px;font-weight:700;color:var(--text-l);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cl-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .15s}
+.cl-item:hover{background:var(--bg)}
+.cl-item.done span{text-decoration:line-through;color:var(--text-l)}
+.cl-box{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all .2s}
+.cl-item.done .cl-box{background:var(--green);border-color:var(--green);color:#fff}
+
+/* ── Misc ── */
+.empty{text-align:center;padding:32px 20px;color:var(--text-l)}
+.empty .ei{font-size:34px;margin-bottom:8px}
+.empty p{font-size:13px;line-height:1.7}
+.toast{position:fixed;bottom:20px;right:20px;background:#3d2b1f;color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;z-index:2000;animation:su .3s ease}
+@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.section-row{display:flex;gap:12px}
+.flex1{flex:1;min-width:0}
+
+/* ── Progress bar ── */
+.prog-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .4s}
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  .budget-tracks{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .cal-d{min-height:50px}
+  .cal-ev{display:none}
+  .cal-d.has-ev::after{content:'●';font-size:6px;color:var(--gold);position:absolute;bottom:3px;right:4px}
+  .fr2{grid-template-columns:1fr}
+  .hm{display:none}
+  .section-row{flex-direction:column}
+}
+@media(max-width:420px){
+  .nav-t{padding:10px 12px;font-size:12px}
+  .main{padding:12px 12px}
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── Tooltip ── */
+#cal-tooltip{
+  position:fixed;z-index:2000;pointer-events:none;display:none;
+  background:#fff;border:1px solid var(--border);border-radius:12px;
+  box-shadow:0 6px 24px rgba(61,43,31,.15);
+  padding:12px 14px;min-width:210px;max-width:280px;
+}
+.tt-type{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
+.tt-type.tour{color:var(--bm)}
+.tt-type.avail{color:var(--gm)}
+.tt-type.other{color:var(--gd)}
+.tt-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
+.tt-date{font-size:11px;color:var(--text-l);margin-bottom:3px}
+.tt-time{font-size:11px;color:var(--text-l);margin-bottom:8px}
+.tt-divider{height:1px;background:var(--border);margin:8px 0}
+.tt-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.tt-lbl{color:var(--text-l)}
+.tt-val{font-weight:500;color:var(--text)}
+.tt-budget{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;margin-top:4px}
+.tt-ok{background:#edf6eb;color:#2e7d26}
+.tt-ov{background:#fee2e2;color:#dc2626}
+
+/* ── 상담일지 ── */
+.visited-badge{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:600;background:var(--green-l);color:#2e7d26;margin-left:6px;vertical-align:middle}
+.log-modal{max-width:580px}
+.log-section{margin-bottom:18px}
+.log-section-t{font-size:12px;font-weight:700;color:var(--text-l);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.log-check-item{display:flex;align-items:flex-start;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .15s;margin-bottom:2px}
+.log-check-item:hover{background:var(--bg)}
+.log-check-item.checked span{text-decoration:line-through;color:var(--text-l)}
+.log-cb{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all .2s;margin-top:1px}
+.log-check-item.checked .log-cb{background:var(--green);border-color:var(--green);color:#fff}
+.log-check-item span{font-size:13px;line-height:1.4}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <h1>💒 웨딩 투어 대시보드</h1>
+  <div class="sub">서울 강서 · 마포 · 구로 · 영등포 웨딩홀 투어 관리</div>
+</header>
+
+<!-- ── BUDGET BAR ── -->
+<div class="budget-bar">
+  <div class="budget-top">
+    <span class="budget-lbl">전체 예산</span>
+    <span class="budget-ttl" id="bttl" title="클릭하여 실제 지출 업데이트"></span>
+  </div>
+  <div class="budget-tracks" id="btracks"></div>
+</div>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="nav-t on" onclick="go('dashboard')">📊 대시보드</div>
+  <div class="nav-t" onclick="go('calendar')">📅 캘린더</div>
+  <div class="nav-t" onclick="go('venues')">🏛️ 베뉴 비교</div>
+  <div class="nav-t" onclick="go('checklist')">✅ 체크리스트</div>
+  <div class="nav-t" onclick="go('notes')">📝 메모</div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard" class="tab">
+    <div class="stats" id="stats"></div>
+    <div class="section-row">
+      <div class="flex1 card">
+        <div class="card-hdr">
+          <div class="card-ttl">📅 다가오는 투어 일정</div>
+          <button class="btn btn-p btn-s" onclick="openEvt()">+ 일정 추가</button>
+        </div>
+        <div id="dash-tours"></div>
+      </div>
+      <div class="flex1 card">
+        <div class="card-hdr">
+          <div class="card-ttl">🏛️ 등록된 베뉴</div>
+          <button class="btn btn-p btn-s" onclick="openVen()">+ 베뉴 추가</button>
+        </div>
+        <div id="dash-venues"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-ttl">💰 예산 현황</div></div>
+      <div id="dash-budget"></div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="tab-calendar" class="tab" style="display:none">
+    <div class="card">
+      <div class="cal-nav">
+        <button onclick="pm()" id="btn-pm">‹</button>
+        <div class="cal-title" id="cal-title"></div>
+        <button onclick="nm()" id="btn-nm">›</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-p btn-s" onclick="openEvt()">+ 일정 추가</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--blue-l);border:1px solid var(--blue)"></div> 투어 일정</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--green-l);border:1px solid var(--green)"></div> 웨딩홀 가능일</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--gold-l);border:1px solid var(--gold)"></div> 기타</div>
+      </div>
+    </div>
+    <!-- Event list below calendar -->
+    <div class="card">
+      <div class="card-hdr"><div class="card-ttl" id="cal-evt-title">이번 달 일정</div></div>
+      <div id="cal-evt-list"></div>
+    </div>
+  </div>
+
+  <!-- VENUES -->
+  <div id="tab-venues" class="tab" style="display:none">
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-ttl">베뉴 비교 목록 <span id="vcnt" style="color:var(--text-l);font-weight:400;font-size:12px"></span></div>
+        <button class="btn btn-p btn-s" onclick="openVen()">+ 베뉴 추가</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <select id="freg" class="fi" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderV()">
+          <option value="">전체 지역</option>
+          <option>강서구</option><option>마포구</option><option>구로구</option><option>영등포구</option><option>기타</option>
+        </select>
+        <select id="fsort" class="fi" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderV()">
+          <option value="name">이름순</option>
+          <option value="cost">예상비용 낮은순</option>
+          <option value="food">식대 낮은순</option>
+          <option value="rating">평점순</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table id="vtbl">
+          <thead><tr>
+            <th>지역</th><th>베뉴명</th><th>홀명</th>
+            <th>대관료</th><th>장식료</th><th>식대/인</th><th>보증인원</th>
+            <th class="hm">예상총액</th><th class="hm">기타옵션</th><th class="hm">비고</th>
+            <th>평점</th><th></th>
+          </tr></thead>
+          <tbody id="vtbody"></tbody>
+        </table>
+      </div>
+      <div id="vempty" class="empty" style="display:none">
+        <div class="ei">🏛️</div>
+        <p>아직 추가된 베뉴가 없습니다.<br>베뉴 추가 버튼으로 시작해보세요!</p>
+      </div>
+    </div>
+    <div class="card" id="vchart-card" style="display:none">
+      <div class="card-ttl" style="margin-bottom:14px">💰 베뉴별 예상 총비용 (예산 2,500만원 기준)</div>
+      <div id="vchart"></div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div id="tab-checklist" class="tab" style="display:none">
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-ttl">웨딩 준비 체크리스트</div>
+        <span id="cl-prog" style="font-size:12px;color:var(--text-l)"></span>
+      </div>
+      <div class="prog-bar" style="margin-bottom:16px"><div class="prog-fill" id="cl-prog-bar" style="width:0%"></div></div>
+      <div id="cl-body"></div>
+      <button class="btn btn-o btn-s" style="margin-top:10px" onclick="addClItem()">+ 항목 추가</button>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div id="tab-notes" class="tab" style="display:none">
+    <div class="card">
+      <div class="card-ttl" style="margin-bottom:12px">📝 자유 메모</div>
+      <textarea class="fi fi-ta" id="notes" style="min-height:140px" placeholder="웨딩 준비 관련 메모를 자유롭게 작성하세요..." oninput="saveNotes()"></textarea>
+    </div>
+    <div class="card">
+      <div class="card-ttl" style="margin-bottom:12px">💡 웨딩홀 투어 체크포인트</div>
+      <div style="font-size:13px;line-height:2;color:var(--text-l)">
+        <p>📌 대관료에 포함되는 항목 확인 (조명·음향·기본 장식 등)</p>
+        <p>📌 외부 업체 반입 가능 여부 (스드메·케이터링·촬영)</p>
+        <p>📌 보증인원 미달 시 위약 조건 및 퍼오버 처리 방식</p>
+        <p>📌 식대 코스별 가격·메뉴 샘플 요청 (시식회 일정 확인)</p>
+        <p>📌 주차 규모 및 주차비 지원 여부</p>
+        <p>📌 드레스룸·신랑신부 대기실 위치 및 시설</p>
+        <p>📌 예식 시간 배정 (몇 부제인지, 청소 소요 시간)</p>
+        <p>📌 계약금·잔금 납부 일정 및 취소/변경 정책</p>
+        <p>📌 촬영 공간(포토존) 현황 및 촬영 허용 범위</p>
+        <p>📌 시즌 성수기·비수기 요금 차이 확인</p>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ── TOOLTIP ── -->
+<div id="cal-tooltip">
+  <div class="tt-type" id="tt-type"></div>
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-date" id="tt-date"></div>
+  <div class="tt-time" id="tt-time"></div>
+  <div id="tt-venue-block" style="display:none">
+    <div class="tt-divider"></div>
+    <div class="tt-row"><span class="tt-lbl">지역</span><span class="tt-val" id="tt-reg"></span></div>
+    <div class="tt-row"><span class="tt-lbl">홀</span><span class="tt-val" id="tt-hall"></span></div>
+    <div class="tt-row"><span class="tt-lbl">대관료</span><span class="tt-val" id="tt-rent"></span></div>
+    <div class="tt-row"><span class="tt-lbl">식대</span><span class="tt-val" id="tt-food"></span></div>
+    <div class="tt-row"><span class="tt-lbl">보증인원</span><span class="tt-val" id="tt-guests"></span></div>
+    <div id="tt-cost-wrap"><span class="tt-budget" id="tt-cost"></span></div>
+  </div>
+</div>
+
+<!-- ── EVENT MODAL ── -->
+<div id="evt-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeEvt()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="evt-title-m">일정 추가</h3>
+      <button class="modal-close" onclick="closeEvt()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="evt-id">
+      <div class="fg">
+        <label class="fl">날짜</label>
+        <input type="date" id="evt-date" class="fi" min="2027-01-01" max="2027-04-30">
+      </div>
+      <div class="fg">
+        <label class="fl">유형</label>
+        <select id="evt-type" class="fi">
+          <option value="tour">🔵 웨딩홀 투어 일정</option>
+          <option value="avail">🟢 웨딩홀 가능일 (예약 가능 날짜)</option>
+          <option value="other">🟡 기타</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">제목 *</label>
+        <input type="text" id="evt-name" class="fi" placeholder="예: ○○웨딩컨벤션 투어">
+      </div>
+      <div class="fg">
+        <label class="fl">관련 베뉴 (선택)</label>
+        <select id="evt-venue" class="fi"></select>
+      </div>
+      <div class="fg">
+        <label class="fl">메모</label>
+        <textarea id="evt-notes" class="fi fi-ta" placeholder="추가 메모 (담당자 연락처, 준비사항 등)"></textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-p" style="flex:1" onclick="saveEvt()">저장</button>
+        <button id="evt-del-btn" class="btn btn-d" style="display:none" onclick="delEvt()">삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VENUE MODAL ── -->
+<div id="ven-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeVen()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="ven-title-m">베뉴 추가</h3>
+      <button class="modal-close" onclick="closeVen()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ven-id">
+      <div class="fr2">
+        <div class="fg">
+          <label class="fl">지역</label>
+          <select id="ven-reg" class="fi">
+            <option>강서구</option><option>마포구</option><option>구로구</option><option>영등포구</option><option>기타</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">베뉴명 *</label>
+          <input type="text" id="ven-name" class="fi" placeholder="예: ○○웨딩컨벤션">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">홀명</label>
+        <input type="text" id="ven-hall" class="fi" placeholder="예: 그랜드홀 A">
+      </div>
+      <div class="fr2">
+        <div class="fg">
+          <label class="fl">대관료 (만원)</label>
+          <input type="number" id="ven-rent" class="fi" placeholder="0">
+        </div>
+        <div class="fg">
+          <label class="fl">장식료 (만원)</label>
+          <input type="number" id="ven-deco" class="fi" placeholder="0">
+        </div>
+      </div>
+      <div class="fr2">
+        <div class="fg">
+          <label class="fl">식대 (만원/인)</label>
+          <input type="number" id="ven-food" class="fi" placeholder="0" step="0.1">
+        </div>
+        <div class="fg">
+          <label class="fl">보증인원 (명)</label>
+          <input type="number" id="ven-guests" class="fi" placeholder="0">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">기타 옵션</label>
+        <input type="text" id="ven-opts" class="fi" placeholder="예: 무료주차 100대, 드레스룸 포함, 외부반입 가능">
+      </div>
+      <div class="fg">
+        <label class="fl">비고 / 방문 소감</label>
+        <textarea id="ven-notes" class="fi fi-ta" placeholder="투어 후 느낀점, 특이사항 등"></textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">평점</label>
+        <div class="rating" id="rat-stars">
+          <span class="rs" onclick="setR(1)">★</span><span class="rs" onclick="setR(2)">★</span>
+          <span class="rs" onclick="setR(3)">★</span><span class="rs" onclick="setR(4)">★</span>
+          <span class="rs" onclick="setR(5)">★</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-p" style="flex:1" onclick="saveVen()">저장</button>
+        <button id="ven-del-btn" class="btn btn-d" style="display:none" onclick="delVen()">삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BUDGET EDIT MODAL ── -->
+<div id="bud-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeBud()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>예산 · 실지출 수정</h3>
+      <button class="modal-close" onclick="closeBud()">✕</button>
+    </div>
+    <div class="modal-body" id="bud-body"></div>
+  </div>
+</div>
+
+<!-- ── 상담일지 MODAL ── -->
+<div id="log-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeLog()">
+  <div class="modal log-modal">
+    <div class="modal-hdr">
+      <h3 id="log-title">📋 상담일지</h3>
+      <button class="modal-close" onclick="closeLog()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="log-ven-id">
+
+      <!-- 방문 기본 정보 -->
+      <div class="log-section">
+        <div class="log-section-t">방문 정보</div>
+        <div class="fr2">
+          <div class="fg">
+            <label class="fl">방문 날짜</label>
+            <input type="date" id="log-date" class="fi">
+          </div>
+          <div class="fg">
+            <label class="fl">방문 시간</label>
+            <input type="text" id="log-time" class="fi" placeholder="예: 17:00">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">담당 직원</label>
+          <input type="text" id="log-consultant" class="fi" placeholder="담당자 이름 또는 연락처">
+        </div>
+      </div>
+
+      <!-- 체크포인트 -->
+      <div class="log-section">
+        <div class="log-section-t">투어 체크포인트</div>
+        <div id="log-checks"></div>
+      </div>
+
+      <!-- 전반적 인상 -->
+      <div class="log-section">
+        <div class="log-section-t">전반적 인상</div>
+        <div class="fg" style="margin-bottom:0">
+          <textarea id="log-impression" class="fi fi-ta" style="min-height:60px" placeholder="첫 인상, 분위기, 직원 응대 등을 간략히 적어주세요"></textarea>
+        </div>
+      </div>
+
+      <!-- 세부 메모 -->
+      <div class="log-section">
+        <div class="log-section-t">세부 상담 메모</div>
+        <div class="fg" style="margin-bottom:0">
+          <textarea id="log-notes" class="fi fi-ta" style="min-height:100px" placeholder="견적 세부 내용, 특이사항, 질문&답변, 다음 방문 시 확인할 사항 등을 자유롭게 적어주세요"></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-p" style="flex:1" onclick="saveLog()">💾 저장</button>
+        <button id="log-del-btn" class="btn btn-d" style="display:none" onclick="delLog()">삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   DATA & STATE
+═══════════════════════════════ */
+const MO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const DW = ['일','월','화','수','목','금','토'];
+
+const LOG_CHECKS = [
+  '대관료 포함 항목 확인 (조명·음향·기본 장식 등)',
+  '외부 업체 반입 가능 여부 (스드메·케이터링·촬영팀)',
+  '식대 코스별 가격·메뉴 샘플 확인 (시식회 일정)',
+  '보증인원 미달 시 위약 조건 및 퍼오버 처리 방식',
+  '주차 규모 및 하객 주차비 지원 여부',
+  '드레스룸·신랑신부 대기실 위치 및 시설 상태',
+  '예식 시간 배정 및 몇 부제인지 확인',
+  '계약금·잔금 납부 일정 및 취소/변경 정책',
+  '포토존 현황 및 본식 촬영 허용 범위',
+  '시즌 성수기·비수기 요금 차이 확인',
+];
+
+const DEF_BUDGET = {
+  hall:{label:'웨딩홀',budget:2500,actual:0,color:'#c4956a'},
+  sdm:{label:'스드메',budget:300,actual:0,color:'#e8a0a0'},
+  honey:{label:'신혼여행',budget:1000,actual:0,color:'#6aaa60'},
+  other:{label:'기타비용',budget:200,actual:0,color:'#6d9aaa'},
+};
+
+const DEF_CL = [
+  {id:'c1',cat:'📍 웨딩홀',text:'웨딩홀 투어 일정 잡기',done:false},
+  {id:'c2',cat:'📍 웨딩홀',text:'견적서 수령 및 비교',done:false},
+  {id:'c3',cat:'📍 웨딩홀',text:'최종 베뉴 계약',done:false},
+  {id:'c4',cat:'📍 웨딩홀',text:'식순 및 메뉴 확정',done:false},
+  {id:'c5',cat:'💄 스드메',text:'스튜디오 계약',done:false},
+  {id:'c6',cat:'💄 스드메',text:'드레스 1차 피팅',done:false},
+  {id:'c7',cat:'💄 스드메',text:'헤어·메이크업 미팅',done:false},
+  {id:'c8',cat:'💄 스드메',text:'본 드레스 최종 확정',done:false},
+  {id:'c9',cat:'✈️ 신혼여행',text:'여행지 결정',done:false},
+  {id:'c10',cat:'✈️ 신혼여행',text:'항공권 예매',done:false},
+  {id:'c11',cat:'✈️ 신혼여행',text:'숙소 예약',done:false},
+  {id:'c12',cat:'📋 기타',text:'청첩장 제작',done:false},
+  {id:'c13',cat:'📋 기타',text:'본식 사진·영상 촬영팀 섭외',done:false},
+  {id:'c14',cat:'📋 기타',text:'혼수 목록 작성',done:false},
+  {id:'c15',cat:'📋 기타',text:'주례·사회자 섭외',done:false},
+];
+
+const DEF_VENUES = [
+  {id:'v1',reg:'영등포구',name:'웨딩그룹위더스',hall:'영등포점',rent:1050,deco:0,food:9.6,guests:200,opts:'음주류·봉사료·VAT 포함 | 200명 미만 캐시백 없음',notes:'잔여: 12:10/12:40/13:20/13:50 (1~3월) | 토 점심250/사이드200/저녁150 | 일 200/150',rating:0},
+  {id:'v2',reg:'강서구',name:'루이비스컨벤션',hall:'강서점',rent:1200,deco:0,food:8.8,guests:200,opts:'음주류·봉사료·VAT 포함 | 본식 사진 필수',notes:'1~3월 토 19:00/일 16:00이후 | 4월 토 11:00·18:30/일 16:20이후',rating:0},
+  {id:'v3',reg:'강서구',name:'베뉴지 강서',hall:'1층 아트홀/네이처홀',rent:800,deco:0,food:7.5,guests:200,opts:'특정 시간 스냅 필수 · 스드메 필수',notes:'',rating:0},
+  {id:'v4',reg:'강서구',name:'베뉴지 강서',hall:'2층 베뉴지홀',rent:1100,deco:0,food:8.5,guests:250,opts:'특정 시간 스냅 필수 · 스드메 필수',notes:'',rating:0},
+  {id:'v5',reg:'강서구',name:'베뉴지 강서',hall:'B1 마리아칼라스',rent:1100,deco:0,food:7.3,guests:150,opts:'음주류 별도 | 식대 A 7.3만/인 or B 8.2만/인',notes:'',rating:0},
+  {id:'v6',reg:'구로구',name:'포포인츠 바이 쉐라톤',hall:'구로',rent:1500,deco:0,food:8.9,guests:150,opts:'음주류 별도 | 토 12시 보증150명 / 그외 100명 가능',notes:'잔여: 1~3월 12시·17시',rating:0},
+  {id:'v7',reg:'구로구',name:'웨스턴베니비스',hall:'신도림 (아스타/그레이스/다이너스티)',rent:750,deco:0,food:7.5,guests:200,opts:'음주류·봉사료·VAT 포함 | 11시~15시 타임 다양',notes:'1~3월 전반 여유 | 일 150명 / 점심 200명 가능',rating:0},
+  {id:'v8',reg:'영등포구',name:'규수당 문래',hall:'',rent:580,deco:0,food:6.5,guests:200,opts:'음주류·봉사료·VAT 포함 | 컨시어지 30만(선택) | 방문 시 추가 할인',notes:'26~27.2월 홀 580만/식대 6.5만 | 27.3~6월 홀 680만/식대 7.0만 | 1~2월 토 전마감 | 3~4월 토 18:00만 | 3월 일요일 점심 여유',rating:0},
+  {id:'v9',reg:'강서구',name:'보타닉파크웨딩',hall:'강서',rent:0,deco:0,food:0,guests:0,opts:'',notes:'2026-05-03 17:00 투어 방문',rating:0},
+];
+
+const DEF_EVENTS = [
+  // ── 상담 일정 (2026년 5월) ──
+  {id:'e0',date:'2026-05-03',type:'tour',name:'보타닉파크웨딩 강서 투어',venueId:'v9',notes:'17:00'},
+  {id:'e1',date:'2026-05-10',type:'tour',name:'규수당 문래 상담',venueId:'v8',notes:'10:00'},
+  {id:'e2',date:'2026-05-10',type:'tour',name:'포포인츠 바이 쉐라톤 상담',venueId:'v6',notes:'14:00'},
+  {id:'e3',date:'2026-05-10',type:'tour',name:'웨스턴베니비스 신도림 상담',venueId:'v7',notes:'16:00'},
+  {id:'e4',date:'2026-05-17',type:'tour',name:'베뉴지 강서 상담',venueId:'v3',notes:'13:00'},
+  {id:'e5',date:'2026-05-23',type:'tour',name:'웨딩그룹위더스 상담',venueId:'v1',notes:'시간 미정'},
+  {id:'e6',date:'2026-05-23',type:'tour',name:'루이비스컨벤션 강서 상담',venueId:'v2',notes:'시간 미정'},
+
+  // ── 규수당 문래 가능일 ──
+  // 1월: 토 전체 마감 / 일요일만 가능
+  {id:'ea01',date:'2027-01-03',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 18:00만 가능'},
+  {id:'ea02',date:'2027-01-10',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 15:30 이후 가능'},
+  {id:'ea03',date:'2027-01-17',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 18:00 가능'},
+  {id:'ea04',date:'2027-01-24',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 15:30 이후 가능'},
+  {id:'ea05',date:'2027-01-31',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 15:30 이후 가능'},
+  // 2월: 토 마감 / 일 16:40 이후
+  {id:'ea06',date:'2027-02-07',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 16:40 이후 가능'},
+  {id:'ea07',date:'2027-02-14',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 16:40 이후 가능'},
+  {id:'ea08',date:'2027-02-21',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 16:40 이후 가능'},
+  {id:'ea09',date:'2027-02-28',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 16:40 이후 가능'},
+  // 3월: 토 18:00 / 일 점심 여유
+  {id:'ea10',date:'2027-03-06',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea11',date:'2027-03-07',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 11:00/12:00/13:10/14:20 가능'},
+  {id:'ea12',date:'2027-03-13',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea13',date:'2027-03-14',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 11:00/12:00/13:10/14:20 가능'},
+  {id:'ea14',date:'2027-03-20',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea15',date:'2027-03-21',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 11:00/12:00/13:10/14:20 가능'},
+  {id:'ea16',date:'2027-03-27',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea17',date:'2027-03-28',type:'avail',name:'규수당 문래',venueId:'v8',notes:'일 11:00/12:00/13:10/14:20 가능'},
+  // 4월: 토 18:00
+  {id:'ea18',date:'2027-04-03',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea19',date:'2027-04-10',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea20',date:'2027-04-17',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+  {id:'ea21',date:'2027-04-24',type:'avail',name:'규수당 문래',venueId:'v8',notes:'토 18:00 가능'},
+
+  // ── 루이비스컨벤션 강서 가능일 (1~3월 토 19:00이후 / 일 16:00이후, 4월 패턴 변경) ──
+  {id:'eb01',date:'2027-01-09',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'토 19:00 이후 가능 (1~3월 동일)'},
+  {id:'eb02',date:'2027-01-10',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'일 16:00 이후 가능 (1~3월 동일)'},
+  {id:'eb03',date:'2027-02-06',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'토 19:00 이후 가능'},
+  {id:'eb04',date:'2027-02-07',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'일 16:00 이후 가능'},
+  {id:'eb05',date:'2027-03-06',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'토 19:00 이후 가능'},
+  {id:'eb06',date:'2027-03-07',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'일 16:00 이후 가능'},
+  {id:'eb07',date:'2027-04-03',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'4월 토: 11:00 또는 18:30 가능'},
+  {id:'eb08',date:'2027-04-04',type:'avail',name:'루이비스컨벤션',venueId:'v2',notes:'4월 일: 16:20 이후 가능'},
+
+  // ── 웨딩그룹위더스 영등포 가능일 (1~3월 점심 타임 여유) ──
+  {id:'ec01',date:'2027-01-09',type:'avail',name:'웨딩그룹위더스',venueId:'v1',notes:'점심 12:10/12:40/13:20/13:50 타임 (1~3월 동일)'},
+  {id:'ec02',date:'2027-02-06',type:'avail',name:'웨딩그룹위더스',venueId:'v1',notes:'점심 12:10/12:40/13:20/13:50 타임'},
+  {id:'ec03',date:'2027-03-06',type:'avail',name:'웨딩그룹위더스',venueId:'v1',notes:'점심 12:10/12:40/13:20/13:50 타임'},
+
+  // ── 포포인츠 바이 쉐라톤 가능일 (1~3월 12시/17시) ──
+  {id:'ed01',date:'2027-01-09',type:'avail',name:'포포인츠 쉐라톤',venueId:'v6',notes:'12:00 또는 17:00 타임 가능 (1~3월 동일)'},
+  {id:'ed02',date:'2027-02-06',type:'avail',name:'포포인츠 쉐라톤',venueId:'v6',notes:'12:00 또는 17:00 타임 가능'},
+  {id:'ed03',date:'2027-03-06',type:'avail',name:'포포인츠 쉐라톤',venueId:'v6',notes:'12:00 또는 17:00 타임 가능'},
+
+  // ── 웨스턴베니비스 신도림 가능일 (1~3월 전반 여유) ──
+  {id:'ee01',date:'2027-01-10',type:'avail',name:'웨스턴베니비스',venueId:'v7',notes:'일 11:00~15:00 다양한 타임 (1~3월 전반 여유)'},
+  {id:'ee02',date:'2027-02-07',type:'avail',name:'웨스턴베니비스',venueId:'v7',notes:'일 11:00~15:00 다양한 타임'},
+  {id:'ee03',date:'2027-03-07',type:'avail',name:'웨스턴베니비스',venueId:'v7',notes:'일 11:00~15:00 다양한 타임'},
+];
+
+let S = {
+  tab:'dashboard',
+  mo:0,          // 0=Jan2027 … 3=Apr2027
+  budget:null,
+  venues:[],
+  events:[],
+  cl:[],
+  notes:'',
+  rat:0,
+  logs:{},       // {venueId: {visitDate,visitTime,consultant,impression,notes,checks:{}}}
+};
+
+/* ── Load / Save ── */
+function load(){
+  try{
+    S.budget = JSON.parse(localStorage.getItem('wb_budget')) || JSON.parse(JSON.stringify(DEF_BUDGET));
+    let storedVenues = JSON.parse(localStorage.getItem('wb_venues'));
+    // 예시 데이터만 있으면 실제 데이터로 교체
+    if(!storedVenues || storedVenues.every(v=>v.name.startsWith('(예시)'))){
+      storedVenues = JSON.parse(JSON.stringify(DEF_VENUES));
+    }
+    S.venues = storedVenues;
+    let storedEvents = JSON.parse(localStorage.getItem('wb_events')) || [];
+    // DEF_EVENTS의 id가 없으면 병합 (새로 추가된 가능일 자동 반영)
+    const storedIds = new Set(storedEvents.map(e=>e.id));
+    const newDefEvts = DEF_EVENTS.filter(e=>!storedIds.has(e.id));
+    if(newDefEvts.length) storedEvents = [...storedEvents, ...newDefEvts];
+    if(!storedEvents.length) storedEvents = JSON.parse(JSON.stringify(DEF_EVENTS));
+    S.events = storedEvents;
+    S.cl     = JSON.parse(localStorage.getItem('wb_cl'))     || JSON.parse(JSON.stringify(DEF_CL));
+    S.notes  = localStorage.getItem('wb_notes') || '';
+    S.logs   = JSON.parse(localStorage.getItem('wb_logs'))   || {};
+  }catch(e){
+    S.budget = JSON.parse(JSON.stringify(DEF_BUDGET));
+    S.venues = JSON.parse(JSON.stringify(DEF_VENUES));
+    S.events = JSON.parse(JSON.stringify(DEF_EVENTS));
+    S.cl = JSON.parse(JSON.stringify(DEF_CL)); S.notes = ''; S.logs = {};
+  }
+}
+function save(){
+  localStorage.setItem('wb_budget', JSON.stringify(S.budget));
+  localStorage.setItem('wb_venues', JSON.stringify(S.venues));
+  localStorage.setItem('wb_events', JSON.stringify(S.events));
+  localStorage.setItem('wb_cl',     JSON.stringify(S.cl));
+  localStorage.setItem('wb_notes',  S.notes);
+  localStorage.setItem('wb_logs',   JSON.stringify(S.logs));
+}
+
+/* ═══════════════════════════════
+   NAVIGATION
+═══════════════════════════════ */
+function go(tab){
+  S.tab = tab;
+  document.querySelectorAll('.tab').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.nav-t').forEach(e=>e.classList.remove('on'));
+  document.getElementById('tab-'+tab).style.display='block';
+  const tabs=['dashboard','calendar','venues','checklist','notes'];
+  document.querySelectorAll('.nav-t')[tabs.indexOf(tab)].classList.add('on');
+  render(tab);
+}
+function render(tab){
+  if(tab==='dashboard') renderDash();
+  else if(tab==='calendar') renderCal();
+  else if(tab==='venues') renderV();
+  else if(tab==='checklist') renderCL();
+  else if(tab==='notes') renderNotes();
+}
+
+/* ═══════════════════════════════
+   BUDGET
+═══════════════════════════════ */
+function renderBudget(){
+  const total = Object.values(S.budget).reduce((s,b)=>s+b.budget,0);
+  const spent = Object.values(S.budget).reduce((s,b)=>s+b.actual,0);
+  const el = document.getElementById('bttl');
+  el.textContent = `${total.toLocaleString()}만원 (지출 ${spent.toLocaleString()}만원)`;
+
+  document.getElementById('btracks').innerHTML = Object.entries(S.budget).map(([k,b])=>{
+    const pct = b.budget>0 ? Math.min(100,(b.actual/b.budget*100)) : 0;
+    const over = b.actual > b.budget;
+    return `<div class="b-track" onclick="openBud()">
+      <div class="b-track-lbl">${b.label}</div>
+      <div class="b-track-bar"><div class="b-track-fill" style="width:${pct}%;background:${over?'#ef4444':b.color}"></div></div>
+      <div class="b-track-amt" style="color:${over?'#ef4444':b.color}">${b.budget.toLocaleString()}만원</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Budget Modal ── */
+function openBud(){
+  const el = document.getElementById('bud-body');
+  el.innerHTML = Object.entries(S.budget).map(([k,b])=>`
+    <div class="fr2" style="margin-bottom:12px">
+      <div class="fg" style="margin-bottom:0">
+        <label class="fl">${b.label} 예산 (만원)</label>
+        <input type="number" class="fi" id="bb_${k}" value="${b.budget}">
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label class="fl">${b.label} 실지출 (만원)</label>
+        <input type="number" class="fi" id="ba_${k}" value="${b.actual}">
+      </div>
+    </div>
+  `).join('') + `<button class="btn btn-p" style="width:100%;margin-top:8px" onclick="saveBud()">저장</button>`;
+  document.getElementById('bud-modal').style.display='flex';
+}
+function closeBud(){ document.getElementById('bud-modal').style.display='none'; }
+function saveBud(){
+  Object.keys(S.budget).forEach(k=>{
+    S.budget[k].budget = parseFloat(document.getElementById('bb_'+k).value)||0;
+    S.budget[k].actual = parseFloat(document.getElementById('ba_'+k).value)||0;
+  });
+  save(); closeBud(); renderBudget();
+  if(S.tab==='dashboard') renderDash();
+  toast('예산이 저장되었습니다!');
+}
+
+/* ═══════════════════════════════
+   DASHBOARD
+═══════════════════════════════ */
+function renderDash(){
+  const now = new Date();
+  const tours = S.events.filter(e=>e.type==='tour');
+  const done  = S.cl.filter(c=>c.done).length;
+  const daysTo = Math.ceil((new Date(2027,0,1)-now)/(864e5));
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-v">${S.venues.length}</div><div class="stat-l">등록 베뉴</div></div>
+    <div class="stat"><div class="stat-v">${tours.length}</div><div class="stat-l">투어 일정</div></div>
+    <div class="stat"><div class="stat-v">${done}/${S.cl.length}</div><div class="stat-l">체크리스트 완료</div></div>
+    <div class="stat"><div class="stat-v" style="font-size:16px">${daysTo>0?'D-'+daysTo.toLocaleString():'✓'}</div><div class="stat-l">웨딩 시즌까지</div></div>
+  `;
+
+  // Upcoming tours
+  const upcoming = S.events
+    .filter(e=>e.type==='tour' && new Date(e.date)>=now)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,4);
+  const tEl = document.getElementById('dash-tours');
+  tEl.innerHTML = upcoming.length===0
+    ? '<div class="empty" style="padding:20px"><div class="ei">📅</div><p>예정된 투어 일정이 없습니다</p></div>'
+    : upcoming.map(e=>{
+        const d = new Date(e.date);
+        const v = S.venues.find(v=>v.id===e.venueId);
+        return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="background:var(--blue-l);color:var(--blue);padding:5px 9px;border-radius:8px;text-align:center;min-width:44px;flex-shrink:0">
+            <div style="font-size:10px">${d.getMonth()+1}월</div>
+            <div style="font-size:17px;font-weight:700">${d.getDate()}</div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${e.name}</div>
+            ${v?`<div style="font-size:11px;color:var(--text-l)">${v.reg} · ${v.name}</div>`:''}
+            ${e.notes?`<div style="font-size:11px;color:var(--text-l)">${e.notes}</div>`:''}
+          </div>
+          <button class="btn btn-o btn-icon" style="margin-left:auto;flex-shrink:0" onclick="openEvt('${e.id}')">✏️</button>
+        </div>`;
+      }).join('');
+
+  // Recent venues
+  const rv = [...S.venues].reverse().slice(0,4);
+  const vEl = document.getElementById('dash-venues');
+  vEl.innerHTML = rv.length===0
+    ? '<div class="empty" style="padding:20px"><div class="ei">🏛️</div><p>등록된 베뉴가 없습니다</p></div>'
+    : rv.map(v=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <span class="tag tag-r">${v.reg}</span>
+          <span style="font-size:13px;font-weight:600;margin-left:6px">${v.name}</span>
+          ${v.hall?`<span style="font-size:11px;color:var(--text-l)"> · ${v.hall}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:#f59e0b;font-size:13px">${'★'.repeat(v.rating||0)}${'☆'.repeat(5-(v.rating||0))}</span>
+          <button class="btn btn-o btn-icon" onclick="openVen('${v.id}')">✏️</button>
+        </div>
+      </div>`).join('');
+
+  // Budget overview
+  const total = Object.values(S.budget).reduce((s,b)=>s+b.budget,0);
+  document.getElementById('dash-budget').innerHTML = Object.entries(S.budget).map(([k,b])=>{
+    const pct = b.budget>0 ? Math.min(100,(b.actual/b.budget*100)).toFixed(0) : 0;
+    const over = b.actual>b.budget;
+    return `<div class="cost-row">
+      <div class="cost-row-top">
+        <span>${b.label}</span>
+        <span style="font-weight:600;color:${over?'#ef4444':b.color}">
+          ${b.actual?b.actual.toLocaleString()+'만':'-'} / ${b.budget.toLocaleString()}만원
+          ${over?'<span style="color:#ef4444;font-size:10px"> 초과!</span>':''}
+        </span>
+      </div>
+      <div class="cost-bar-bg"><div class="cost-bar-fill" style="width:${pct}%;background:${over?'#ef4444':b.color}"></div></div>
+    </div>`;
+  }).join('') + `<div style="margin-top:10px;font-size:12px;color:var(--text-l);text-align:right">
+    총 예산 ${total.toLocaleString()}만원 · <button class="btn btn-o btn-s" onclick="openBud()">예산 수정</button>
+  </div>`;
+}
+
+/* ═══════════════════════════════
+   CALENDAR
+═══════════════════════════════ */
+function getYM(){ return { y:2027, m:S.mo }; }
+
+function pm(){
+  if(S.mo>0){ S.mo--; renderCal(); }
+  else toast('2027년 1월이 시작입니다.');
+}
+function nm(){
+  if(S.mo<3){ S.mo++; renderCal(); }
+  else toast('2027년 4월이 마지막입니다.');
+}
+
+function renderCal(){
+  const {y,m} = getYM();
+  document.getElementById('cal-title').textContent = `2027년 ${MO[m]}`;
+  document.getElementById('btn-pm').disabled = S.mo===0;
+  document.getElementById('btn-nm').disabled = S.mo===3;
+
+  const first = new Date(y,m,1).getDay();
+  const days  = new Date(y,m+1,0).getDate();
+  const today = new Date();
+  const monthEvts = S.events.filter(e=>{
+    const d=new Date(e.date); return d.getFullYear()===y&&d.getMonth()===m;
+  });
+
+  let html = DW.map(d=>`<div class="cal-dh">${d}</div>`).join('');
+  for(let i=0;i<first;i++) html+=`<div class="cal-d other"></div>`;
+
+  for(let day=1;day<=days;day++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const devts=S.events.filter(e=>e.date===ds);
+    const dow=(first+day-1)%7;
+    let cls='cal-d'+(dow===0?' sun':dow===6?' sat':'');
+    if(today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===day) cls+=' today';
+    if(devts.length) cls+=' has-ev';
+    const ev=devts.map(e=>{
+      const ec=e.type==='tour'?'ev-tour':e.type==='avail'?'ev-avail':'ev-other';
+      const shortName=e.name.length>9?e.name.slice(0,9)+'…':e.name;
+      return `<div class="cal-ev ${ec}"
+        onclick="event.stopPropagation();openEvt('${e.id}')"
+        onmouseenter="showTip(event,'${e.id}')"
+        onmouseleave="hideTip()">${shortName}</div>`;
+    }).join('');
+    html+=`<div class="${cls}" onclick="openEvt(null,'${ds}')"><div class="cal-dn">${day}</div>${ev}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+
+  // Event list
+  document.getElementById('cal-evt-title').textContent = `2027년 ${MO[m]} 일정 (${monthEvts.length}건)`;
+  const listEl = document.getElementById('cal-evt-list');
+  if(!monthEvts.length){
+    listEl.innerHTML='<div class="empty" style="padding:16px"><p>이번 달 등록된 일정이 없습니다</p></div>';
+    return;
+  }
+  listEl.innerHTML = monthEvts.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{
+    const d=new Date(e.date);
+    const tc=e.type==='tour'?'ev-tour':e.type==='avail'?'ev-avail':'ev-other';
+    const tl=e.type==='tour'?'투어':e.type==='avail'?'가능일':'기타';
+    const v=S.venues.find(v=>v.id===e.venueId);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div class="cal-ev ${tc}" style="flex-shrink:0;font-size:11px">${tl}</div>
+      <div style="flex:1">
+        <span style="font-size:13px;font-weight:600">${d.getMonth()+1}/${d.getDate()}(${DW[d.getDay()]}) ${e.name}</span>
+        ${v?`<span style="font-size:11px;color:var(--text-l)"> · ${v.name}</span>`:''}
+        ${e.notes?`<div style="font-size:11px;color:var(--text-l)">${e.notes}</div>`:''}
+      </div>
+      <button class="btn btn-o btn-icon" onclick="openEvt('${e.id}')">✏️</button>
+    </div>`;
+  }).join('');
+}
+
+/* ── Event Modal ── */
+function openEvt(id,prefillDate){
+  document.getElementById('evt-id').value=id||'';
+  document.getElementById('evt-title-m').textContent=id?'일정 수정':'일정 추가';
+  document.getElementById('evt-del-btn').style.display=id?'':'none';
+  // venue select
+  document.getElementById('evt-venue').innerHTML=
+    '<option value="">관련 베뉴 없음</option>'+
+    S.venues.map(v=>`<option value="${v.id}">${v.name} – ${v.hall}</option>`).join('');
+  if(id){
+    const e=S.events.find(e=>e.id===id);
+    if(e){
+      document.getElementById('evt-date').value=e.date;
+      document.getElementById('evt-type').value=e.type;
+      document.getElementById('evt-name').value=e.name;
+      document.getElementById('evt-venue').value=e.venueId||'';
+      document.getElementById('evt-notes').value=e.notes||'';
+    }
+  }else{
+    document.getElementById('evt-date').value=prefillDate||'2027-01-01';
+    document.getElementById('evt-type').value='tour';
+    document.getElementById('evt-name').value='';
+    document.getElementById('evt-venue').value='';
+    document.getElementById('evt-notes').value='';
+  }
+  document.getElementById('evt-modal').style.display='flex';
+}
+function closeEvt(){ document.getElementById('evt-modal').style.display='none'; }
+function saveEvt(){
+  const date=document.getElementById('evt-date').value;
+  const name=document.getElementById('evt-name').value.trim();
+  if(!date||!name){alert('날짜와 제목을 입력해주세요.');return;}
+  const data={date,type:document.getElementById('evt-type').value,name,
+    venueId:document.getElementById('evt-venue').value,
+    notes:document.getElementById('evt-notes').value.trim()};
+  const id=document.getElementById('evt-id').value;
+  if(id){ const i=S.events.findIndex(e=>e.id===id); if(i>=0) S.events[i]={...S.events[i],...data}; }
+  else S.events.push({id:'e'+Date.now(),...data});
+  save(); closeEvt(); render(S.tab); toast('일정이 저장되었습니다!');
+}
+function delEvt(){
+  if(!confirm('이 일정을 삭제하시겠습니까?'))return;
+  const id=document.getElementById('evt-id').value;
+  S.events=S.events.filter(e=>e.id!==id);
+  save(); closeEvt(); render(S.tab); toast('일정이 삭제되었습니다.');
+}
+
+/* ═══════════════════════════════
+   VENUES
+═══════════════════════════════ */
+function renderV(){
+  const reg=document.getElementById('freg').value;
+  const srt=document.getElementById('fsort').value;
+  let vs=[...S.venues];
+  if(reg) vs=vs.filter(v=>v.reg===reg);
+  if(srt==='cost') vs.sort((a,b)=>totalCost(a)-totalCost(b));
+  else if(srt==='food') vs.sort((a,b)=>(a.food||0)-(b.food||0));
+  else if(srt==='rating') vs.sort((a,b)=>(b.rating||0)-(a.rating||0));
+  else vs.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+
+  document.getElementById('vcnt').textContent=`(${vs.length}개)`;
+  const tbody=document.getElementById('vtbody');
+  const empty=document.getElementById('vempty');
+  const tbl=document.getElementById('vtbl');
+
+  if(!vs.length){ empty.style.display='block'; tbl.style.display='none'; }
+  else{
+    empty.style.display='none'; tbl.style.display='table';
+    const budget=S.budget.hall.budget;
+    tbody.innerHTML=vs.map(v=>{
+      const tc=totalCost(v);
+      const over=tc>0&&tc>budget;
+      const stars='★'.repeat(v.rating||0)+'☆'.repeat(5-(v.rating||0));
+      const hasLog=!!S.logs[v.id];
+      return `<tr>
+        <td><span class="tag tag-r">${v.reg}</span></td>
+        <td><strong>${v.name}</strong>${hasLog?'<span class="visited-badge">방문완료</span>':''}</td>
+        <td style="color:var(--text-l)">${v.hall||'–'}</td>
+        <td>${v.rent?v.rent.toLocaleString()+'만':'–'}</td>
+        <td>${v.deco?v.deco.toLocaleString()+'만':'–'}</td>
+        <td>${v.food?v.food.toLocaleString()+'만/인':'–'}</td>
+        <td>${v.guests?v.guests+'명':'–'}</td>
+        <td class="hm" style="color:${over?'#ef4444':tc?'var(--gold-d)':'var(--text-l)'};font-weight:${tc?600:400}">
+          ${tc?tc.toLocaleString()+'만원'+(over?' ⚠️':''):'–'}
+        </td>
+        <td class="hm td-clip" style="font-size:11px;color:var(--text-l)" title="${(v.opts||'').replace(/"/g,'&quot;')}">${v.opts||'–'}</td>
+        <td class="hm td-clip" style="font-size:11px;color:var(--text-l)" title="${(v.notes||'').replace(/"/g,'&quot;')}">${v.notes||'–'}</td>
+        <td style="color:#f59e0b;white-space:nowrap">${stars}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-o btn-icon" onclick="openLog('${v.id}')" title="상담일지">📋</button>
+          <button class="btn btn-o btn-icon" onclick="openVen('${v.id}')">✏️</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  renderVChart(vs);
+}
+
+function totalCost(v){
+  if(!v.food||!v.guests) return 0;
+  return (v.rent||0)+(v.deco||0)+(v.food*v.guests);
+}
+
+function renderVChart(vs){
+  const card=document.getElementById('vchart-card');
+  const el=document.getElementById('vchart');
+  const hasCost=vs.filter(v=>totalCost(v)>0);
+  if(!hasCost.length){card.style.display='none';return;}
+  card.style.display='block';
+  const budget=S.budget.hall.budget;
+  const max=Math.max(...hasCost.map(v=>totalCost(v)),budget);
+  el.innerHTML=hasCost.sort((a,b)=>totalCost(a)-totalCost(b)).map(v=>{
+    const tc=totalCost(v);
+    const pct=(tc/max*100).toFixed(1);
+    const bpct=(tc/budget*100).toFixed(0);
+    const over=tc>budget;
+    return `<div class="cost-row">
+      <div class="cost-row-top">
+        <span style="font-weight:600">${v.name} <span style="font-weight:400;color:var(--text-l)">(${v.hall})</span></span>
+        <span style="color:${over?'#ef4444':'var(--gold-d)'};font-weight:700">
+          ${tc.toLocaleString()}만원 <span style="font-size:11px;font-weight:400">(예산의 ${bpct}%${over?' ⚠️ 초과':''})</span>
+        </span>
+      </div>
+      <div class="cost-bar-bg">
+        <div class="cost-bar-fill" style="width:${pct}%;background:${over?'#f87171':'var(--gold)'}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  // Budget line indicator note
+  el.innerHTML+=`<div style="margin-top:10px;font-size:11px;color:var(--text-l)">
+    ※ 예상총액 = 대관료 + 장식료 + (식대 × 보증인원) · 예산 기준: ${budget.toLocaleString()}만원
+  </div>`;
+}
+
+/* ── Venue Modal ── */
+function openVen(id){
+  S.rat=0;
+  document.getElementById('ven-id').value=id||'';
+  document.getElementById('ven-title-m').textContent=id?'베뉴 수정':'베뉴 추가';
+  document.getElementById('ven-del-btn').style.display=id?'':'none';
+  if(id){
+    const v=S.venues.find(v=>v.id===id);
+    if(v){
+      document.getElementById('ven-reg').value=v.reg;
+      document.getElementById('ven-name').value=v.name;
+      document.getElementById('ven-hall').value=v.hall||'';
+      document.getElementById('ven-rent').value=v.rent||'';
+      document.getElementById('ven-deco').value=v.deco||'';
+      document.getElementById('ven-food').value=v.food||'';
+      document.getElementById('ven-guests').value=v.guests||'';
+      document.getElementById('ven-opts').value=v.opts||'';
+      document.getElementById('ven-notes').value=v.notes||'';
+      S.rat=v.rating||0;
+    }
+  }else{
+    ['ven-name','ven-hall','ven-rent','ven-deco','ven-food','ven-guests','ven-opts','ven-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('ven-reg').value='강서구';
+  }
+  updateRat();
+  document.getElementById('ven-modal').style.display='flex';
+}
+function closeVen(){ document.getElementById('ven-modal').style.display='none'; }
+function setR(n){ S.rat=n; updateRat(); }
+function updateRat(){
+  document.querySelectorAll('#rat-stars .rs').forEach((s,i)=>s.classList.toggle('on',i<S.rat));
+}
+function saveVen(){
+  const name=document.getElementById('ven-name').value.trim();
+  if(!name){alert('베뉴명을 입력해주세요.');return;}
+  const data={
+    reg:document.getElementById('ven-reg').value,name,
+    hall:document.getElementById('ven-hall').value.trim(),
+    rent:parseFloat(document.getElementById('ven-rent').value)||0,
+    deco:parseFloat(document.getElementById('ven-deco').value)||0,
+    food:parseFloat(document.getElementById('ven-food').value)||0,
+    guests:parseInt(document.getElementById('ven-guests').value)||0,
+    opts:document.getElementById('ven-opts').value.trim(),
+    notes:document.getElementById('ven-notes').value.trim(),
+    rating:S.rat,
+  };
+  const id=document.getElementById('ven-id').value;
+  if(id){ const i=S.venues.findIndex(v=>v.id===id); if(i>=0) S.venues[i]={...S.venues[i],...data}; }
+  else S.venues.push({id:'v'+Date.now(),...data});
+  save(); closeVen(); render(S.tab); toast('베뉴가 저장되었습니다!');
+}
+function delVen(){
+  if(!confirm('이 베뉴를 삭제하시겠습니까?'))return;
+  const id=document.getElementById('ven-id').value;
+  S.venues=S.venues.filter(v=>v.id!==id);
+  S.events.forEach(e=>{if(e.venueId===id)e.venueId='';});
+  save(); closeVen(); render(S.tab); toast('베뉴가 삭제되었습니다.');
+}
+
+/* ═══════════════════════════════
+   CHECKLIST
+═══════════════════════════════ */
+function renderCL(){
+  const done=S.cl.filter(c=>c.done).length;
+  const pct=S.cl.length?Math.round(done/S.cl.length*100):0;
+  document.getElementById('cl-prog').textContent=`${done}/${S.cl.length} 완료 (${pct}%)`;
+  document.getElementById('cl-prog-bar').style.width=pct+'%';
+  const cats=[...new Set(S.cl.map(c=>c.cat))];
+  document.getElementById('cl-body').innerHTML=cats.map(cat=>{
+    const items=S.cl.filter(c=>c.cat===cat);
+    const cd=items.filter(c=>c.done).length;
+    return `<div class="cl-cat">
+      <div class="cl-cat-t">${cat} <span style="font-weight:400">(${cd}/${items.length})</span></div>
+      ${items.map(c=>`
+        <div class="cl-item${c.done?' done':''}" onclick="toggleCL('${c.id}')">
+          <div class="cl-box">${c.done?'✓':''}</div>
+          <span style="font-size:13px">${c.text}</span>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function toggleCL(id){
+  const c=S.cl.find(c=>c.id===id);
+  if(c){c.done=!c.done;save();renderCL();}
+}
+function addClItem(){
+  const text=prompt('추가할 항목을 입력하세요:','');
+  if(!text)return;
+  const cat=prompt('카테고리를 입력하세요 (예: 📍 웨딩홀):','📋 기타')||'📋 기타';
+  S.cl.push({id:'c'+Date.now(),cat,text,done:false});
+  save();renderCL();
+}
+
+/* ═══════════════════════════════
+   NOTES
+═══════════════════════════════ */
+function renderNotes(){
+  document.getElementById('notes').value=S.notes;
+}
+function saveNotes(){
+  S.notes=document.getElementById('notes').value;
+  save();
+}
+
+/* ═══════════════════════════════
+   TOOLTIP
+═══════════════════════════════ */
+const DW_KO=['일','월','화','수','목','금','토'];
+function showTip(mouseEvt, eventId){
+  const e=S.events.find(ev=>ev.id===eventId);
+  if(!e) return;
+  const v=e.venueId?S.venues.find(v=>v.id===e.venueId):null;
+  const d=new Date(e.date);
+  const tt=document.getElementById('cal-tooltip');
+
+  // type
+  const typeEl=document.getElementById('tt-type');
+  const typeLabel=e.type==='tour'?'투어 상담':e.type==='avail'?'웨딩홀 가능일':'기타';
+  typeEl.textContent=typeLabel;
+  typeEl.className='tt-type '+e.type;
+
+  // name & date
+  document.getElementById('tt-name').textContent=e.name;
+  document.getElementById('tt-date').textContent=
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${DW_KO[d.getDay()]})`;
+  document.getElementById('tt-time').textContent=e.notes?'⏰ '+e.notes:'';
+
+  // venue block
+  const vBlock=document.getElementById('tt-venue-block');
+  if(v){
+    vBlock.style.display='block';
+    document.getElementById('tt-reg').textContent=v.reg;
+    document.getElementById('tt-hall').textContent=v.hall||'–';
+    document.getElementById('tt-rent').textContent=v.rent?v.rent.toLocaleString()+'만원':'미정';
+    document.getElementById('tt-food').textContent=v.food?v.food.toLocaleString()+'만원/인':'미정';
+    document.getElementById('tt-guests').textContent=v.guests?v.guests+'명':'미정';
+    const tc=(v.rent||0)+(v.deco||0)+(v.food||0)*(v.guests||0);
+    const costEl=document.getElementById('tt-cost');
+    if(tc>0){
+      const over=tc>S.budget.hall.budget;
+      costEl.textContent='예상 총비용 '+tc.toLocaleString()+'만원'+(over?' ⚠️ 초과':'');
+      costEl.className='tt-budget '+(over?'tt-ov':'tt-ok');
+      document.getElementById('tt-cost-wrap').style.display='';
+    } else {
+      document.getElementById('tt-cost-wrap').style.display='none';
+    }
+  } else {
+    vBlock.style.display='none';
+  }
+
+  // position
+  tt.style.display='block';
+  const tw=tt.offsetWidth, th=tt.offsetHeight;
+  const mx=mouseEvt.clientX, my=mouseEvt.clientY;
+  let left=mx+12, top=my-th/2;
+  if(left+tw>window.innerWidth-8) left=mx-tw-12;
+  if(top<8) top=8;
+  if(top+th>window.innerHeight-8) top=window.innerHeight-th-8;
+  tt.style.left=left+'px';
+  tt.style.top=top+'px';
+}
+function hideTip(){
+  document.getElementById('cal-tooltip').style.display='none';
+}
+
+/* ═══════════════════════════════
+   상담일지 (CONSULTATION LOG)
+═══════════════════════════════ */
+let _logChecks = {}; // temp state while modal is open
+
+function openLog(venueId){
+  const v = S.venues.find(v=>v.id===venueId);
+  if(!v) return;
+  const lg = S.logs[venueId] || {};
+  _logChecks = {...(lg.checks||{})};
+
+  document.getElementById('log-ven-id').value = venueId;
+  document.getElementById('log-title').textContent = '📋 상담일지 — ' + v.name + (v.hall?' ('+v.hall+')':'');
+  document.getElementById('log-date').value = lg.visitDate || '';
+  document.getElementById('log-time').value = lg.visitTime || '';
+  document.getElementById('log-consultant').value = lg.consultant || '';
+  document.getElementById('log-impression').value = lg.impression || '';
+  document.getElementById('log-notes').value = lg.notes || '';
+  document.getElementById('log-del-btn').style.display = S.logs[venueId] ? '' : 'none';
+
+  // render checklist
+  document.getElementById('log-checks').innerHTML = LOG_CHECKS.map((txt,i)=>{
+    const checked = !!_logChecks['c'+i];
+    return `<div class="log-check-item${checked?' checked':''}" onclick="toggleLogCheck(${i})" id="lc${i}">
+      <div class="log-cb">${checked?'✓':''}</div>
+      <span>${txt}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('log-modal').style.display='flex';
+}
+
+function closeLog(){
+  document.getElementById('log-modal').style.display='none';
+  _logChecks={};
+}
+
+function toggleLogCheck(i){
+  const key='c'+i;
+  _logChecks[key] = !_logChecks[key];
+  const el = document.getElementById('lc'+i);
+  if(el){
+    el.classList.toggle('checked', !!_logChecks[key]);
+    el.querySelector('.log-cb').textContent = _logChecks[key]?'✓':'';
+  }
+}
+
+function saveLog(){
+  const venueId = document.getElementById('log-ven-id').value;
+  if(!venueId) return;
+  const visitDate = document.getElementById('log-date').value;
+  const visitTime = document.getElementById('log-time').value.trim();
+  const consultant = document.getElementById('log-consultant').value.trim();
+  const impression = document.getElementById('log-impression').value.trim();
+  const notes = document.getElementById('log-notes').value.trim();
+
+  if(!visitDate && !impression && !notes && !Object.values(_logChecks).some(Boolean)){
+    alert('날짜나 메모를 입력한 뒤 저장해주세요.');return;
+  }
+  S.logs[venueId] = {visitDate, visitTime, consultant, impression, notes, checks:{..._logChecks}};
+  save(); closeLog(); renderV();
+  toast('상담일지가 저장되었습니다!');
+}
+
+function delLog(){
+  if(!confirm('이 상담일지를 삭제하시겠습니까?')) return;
+  const venueId = document.getElementById('log-ven-id').value;
+  delete S.logs[venueId];
+  save(); closeLog(); renderV();
+  toast('상담일지가 삭제되었습니다.');
+}
+
+/* ═══════════════════════════════
+   TOAST
+═══════════════════════════════ */
+function toast(msg){
+  const t=document.createElement('div');
+  t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2200);
+}
+
+/* ═══════════════════════════════
+   INIT
+═══════════════════════════════ */
+load();
+renderBudget();
+renderDash();
+
+// ── CHAT INTEGRATION HELPER ──
+// 채팅창에서 아래 함수를 활용해 데이터를 추가할 수 있습니다
+window.WD = {
+  addVenue(v){
+    S.venues.push({id:'v'+Date.now(),...v,rating:v.rating||0});
+    save();render(S.tab);renderBudget();toast('베뉴 추가: '+v.name);
+  },
+  addEvent(e){
+    S.events.push({id:'e'+Date.now(),...e});
+    save();render(S.tab);toast('일정 추가: '+e.name);
+  },
+  exportJSON(){
+    const data={budget:S.budget,venues:S.venues,events:S.events,checklist:S.cl,notes:S.notes};
+    const a=document.createElement('a');
+    a.href='data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2));
+    a.download='wedding_data.json';a.click();
+  },
+  importJSON(json){
+    const d=typeof json==='string'?JSON.parse(json):json;
+    if(d.venues)S.venues=[...S.venues,...d.venues];
+    if(d.events)S.events=[...S.events,...d.events];
+    save();render(S.tab);renderBudget();toast('데이터 가져오기 완료!');
+  }
+};
+</script>
+</body>
+</html>
